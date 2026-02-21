@@ -1,0 +1,3 @@
+[submodule "integrationplatform.dashboard"]
+	path = integrationplatform.dashboard
+	url = https://github.com/XianThi/integrationplatform.dashboard
