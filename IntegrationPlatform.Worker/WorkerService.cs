@@ -280,10 +280,14 @@ public class WorkerService : BackgroundService
         }
 
         _heartbeatTimer?.Dispose();
-
-        // Node'u offline olarak iþaretle
-        await UpdateNodeStatusAsync(NodeStatus.Offline);
-
+        try
+        {
+            // Node'u offline olarak iþaretle
+            await UpdateNodeStatusAsync(NodeStatus.Offline);
+        }catch (Exception ex)
+        {
+            _logger.LogError(ex, "Node durdurulurken hata oluþtu");
+        }
         await base.StopAsync(cancellationToken);
     }
 
@@ -291,6 +295,11 @@ public class WorkerService : BackgroundService
     {
         try
         {
+            if(_currentNode == null)
+            {
+                _logger.LogWarning("Node bilgisi mevcut deðil, status güncellenemiyor");
+                return;
+            }
             await _apiClient.UpdateNodeStatusAsync(_currentNode.Id, status);
         }
         catch (Exception ex)

@@ -169,7 +169,7 @@ namespace IntegrationPlatform.Worker.Engine
 
                 // Json herşey olabilir - configuration'dan anlarız
                 AdapterType.JsonFile => DetermineJsonDirection(configuration),
-
+                AdapterType.JsonWriter => AdapterDirection.Destination,
                 // Database source veya destination olabilir
                 AdapterType.Database => configuration.ContainsKey("ConnectionString") && configuration.ContainsKey("Query")
                     ? AdapterDirection.Source
@@ -224,7 +224,7 @@ namespace IntegrationPlatform.Worker.Engine
             {
                 AdapterType.Rest => "IntegrationPlatform.Adapters.Rest",
                 AdapterType.JsonFile => "IntegrationPlatform.Adapters.Json",
-                AdapterType.JsonWriter => "IntegrationPlatform.Adapters.Json",
+                AdapterType.JsonWriter => "IntegrationPlatform.Adapters.Json.Writer",
                 AdapterType.Database => "IntegrationPlatform.Adapters.Database",
                 _ => throw new NotSupportedException($"Adapter tipi desteklenmiyor: {adapterType}")
             };

@@ -33,7 +33,7 @@ namespace IntegrationPlatform.Worker.Services
                 { AdapterType.Database, "IntegrationPlatform.Adapters.Database" },
                 { AdapterType.JsonFile, "IntegrationPlatform.Adapters.Json" },
                 { AdapterType.CsvFile, "IntegrationPlatform.Adapters.Csv" },
-                { AdapterType.XmlFile, "IntegrationPlatform.Adapters.Xml" },
+                //{ AdapterType.XmlFile, "IntegrationPlatform.Adapters.Xml" },
                 { AdapterType.ExcelFile, "IntegrationPlatform.Adapters.Excel" },
                 { AdapterType.Ftp, "IntegrationPlatform.Adapters.Ftp" },
                 
@@ -47,7 +47,7 @@ namespace IntegrationPlatform.Worker.Services
                 { AdapterType.DatabaseWriter, "IntegrationPlatform.Adapters.Database" },
                 { AdapterType.JsonWriter, "IntegrationPlatform.Adapters.Json" },
                 { AdapterType.CsvWriter, "IntegrationPlatform.Adapters.Csv" },
-                { AdapterType.XmlWriter, "IntegrationPlatform.Adapters.Xml" },
+                //{ AdapterType.XmlWriter, "IntegrationPlatform.Adapters.Xml" },
                 { AdapterType.ExcelWriter, "IntegrationPlatform.Adapters.Excel" },
                 { AdapterType.FtpWriter, "IntegrationPlatform.Adapters.Ftp" }
             };
@@ -133,7 +133,7 @@ namespace IntegrationPlatform.Worker.Services
                 AdapterType.Database => AdapterDirection.Source,
                 AdapterType.JsonFile => AdapterDirection.Source,
                 AdapterType.CsvFile => AdapterDirection.Source,
-                AdapterType.XmlFile => AdapterDirection.Source,
+                //AdapterType.XmlFile => AdapterDirection.Source,
                 AdapterType.ExcelFile => AdapterDirection.Source,
                 AdapterType.Ftp => AdapterDirection.Source,
 
@@ -147,7 +147,7 @@ namespace IntegrationPlatform.Worker.Services
                 AdapterType.DatabaseWriter => AdapterDirection.Destination,
                 AdapterType.JsonWriter => AdapterDirection.Destination,
                 AdapterType.CsvWriter => AdapterDirection.Destination,
-                AdapterType.XmlWriter => AdapterDirection.Destination,
+                //AdapterType.XmlWriter => AdapterDirection.Destination,
                 AdapterType.ExcelWriter => AdapterDirection.Destination,
                 AdapterType.FtpWriter => AdapterDirection.Destination,
 

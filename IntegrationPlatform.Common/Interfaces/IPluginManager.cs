@@ -8,7 +8,7 @@ namespace IntegrationPlatform.Common.Interfaces
     {
         // Plugin yükleme
         Task<IEnumerable<IPlugin>> LoadPluginsAsync(string pluginsPath);
-        Task<IPlugin> LoadPluginAsync(string assemblyPath);
+        Task<List<IPlugin>> LoadPluginAsync(string assemblyPath);
 
         // Plugin tiplerine göre getirme
         Task<IEnumerable<ISourcePlugin>> GetSourcePluginsAsync();

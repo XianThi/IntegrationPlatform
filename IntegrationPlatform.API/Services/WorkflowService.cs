@@ -72,7 +72,12 @@ namespace IntegrationPlatform.API.Services
                         .ToList();
                 }
             }
-            var workflow = _mapper.Map<WorkflowDefinition>(workflowDto);
+            var workflow = new WorkflowDefinition();
+            workflow.Name = workflowDto.Name;
+            workflow.Description = workflowDto.Description;
+            workflow.IsActive = workflowDto.IsActive;
+            workflow.GlobalVariables = workflowDto.GlobalVariables;
+            workflow.Steps = steps;
             workflow.CreatedBy = createdBy;
             workflow.Id = Guid.NewGuid();
             workflow.Steps = steps;

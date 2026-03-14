@@ -41,7 +41,7 @@ namespace IntegrationPlatform.Common.DTOs
         public DateTime StartedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
         public WorkflowStatus Status { get; set; }
-        public string ErrorMessage { get; set; }
+        public string? ErrorMessage { get; set; }
         public List<StepExecutionDto> StepExecutions { get; set; }
     }
 
@@ -51,11 +51,11 @@ namespace IntegrationPlatform.Common.DTOs
         public DateTime StartedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
         public bool IsSuccess { get; set; }
-        public string Error { get; set; }
+        public string? Error { get; set; }
         public long ProcessedRecords { get; set; }
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string OutputPreview { get; set; }
+        public string OutputPreview { get; set; } = string.Empty;
     }
 
     public class  UpdateWorkflowDto

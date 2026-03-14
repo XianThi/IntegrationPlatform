@@ -53,11 +53,20 @@ namespace IntegrationPlatform.Worker.Plugins
                 try
                 {
                     _logger.LogInformation("Plugin yükleniyor: {Dll}", dll);
-                    var plugin = await LoadPluginAsync(dll);
-                    if (plugin != null)
+                    var plugins = await LoadPluginAsync(dll);
+                    if (plugins != null && plugins.Any())
                     {
-                        loadedPlugins.Add(plugin);
-                        _logger.LogInformation("Plugin yüklendi: {PluginName}", plugin.Name);
+                        loadedPlugins.AddRange(plugins);
+                        _logger.LogInformation("{Count} plugin yüklendi: {Dll}", plugins.Count, dll);
+
+                        foreach (var plugin in plugins)
+                        {
+                            _logger.LogDebug("  - {PluginName} ({Direction})", plugin.Name, plugin.Direction);
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Plugin bulunamadı: {Dll}", dll);
                     }
                 }
                 catch (Exception ex)
@@ -75,10 +84,18 @@ namespace IntegrationPlatform.Worker.Plugins
             }
 
             _logger.LogInformation("Toplam {Count} plugin yüklendi", loadedPlugins.Count);
+
+            // Direction'a göre grupla ve logla
+            var grouped = loadedPlugins.GroupBy(p => p.Direction);
+            foreach (var group in grouped)
+            {
+                _logger.LogInformation("  {Direction}: {Count} plugin", group.Key, group.Count());
+            }
+
             return loadedPlugins;
         }
 
-        public async Task<IPlugin> LoadPluginAsync(string assemblyPath)
+        public async Task<List<IPlugin>> LoadPluginAsync(string assemblyPath)
         {
             _logger.LogDebug("Plugin yükleniyor: {AssemblyPath}", assemblyPath);
 
@@ -88,7 +105,7 @@ namespace IntegrationPlatform.Worker.Plugins
                 PluginId = Guid.NewGuid().ToString(),
                 LoadContext = new AssemblyLoadContext(Path.GetFileName(assemblyPath), true)
             };
-
+            var loadedPlugins = new List<IPlugin>();
             try
             {
                 using var fs = new FileStream(assemblyPath, FileMode.Open, FileAccess.Read);
@@ -117,7 +134,7 @@ namespace IntegrationPlatform.Worker.Plugins
                                 await plugin.InitializeAsync(initContext);
                                 _plugins[plugin.Id] = plugin;
                                 _isolatedContexts[plugin.Id] = context;
-
+                                loadedPlugins.Add(plugin);
                                 _logger.LogInformation("Plugin yüklendi: {PluginName} v{Version}",
                                     plugin.Name, plugin.Version);
 
@@ -131,7 +148,6 @@ namespace IntegrationPlatform.Worker.Plugins
                                     IsSuccess = true,
                                     LoadedAt = DateTime.UtcNow
                                 });
-                                return plugin;
                             }
                         }
                         catch (Exception ex)
@@ -147,12 +163,12 @@ namespace IntegrationPlatform.Worker.Plugins
                         // Activator.CreateInstance overload'u ile dene
                         try
                         {
-                            var plugin = Activator.CreateInstance(pluginType, true) as IPlugin;
+                            var plugin = CreatePluginInstance(pluginType);
                             if (plugin != null)
                             {
                                 _plugins[plugin.Id] = plugin;
                                 _isolatedContexts[plugin.Id] = context;
-
+                                loadedPlugins.Add(plugin);
                                 _logger.LogInformation("Plugin yüklendi: {PluginName} v{Version}",
                                     plugin.Name, plugin.Version);
 
@@ -166,7 +182,6 @@ namespace IntegrationPlatform.Worker.Plugins
                                     IsSuccess = true,
                                     LoadedAt = DateTime.UtcNow
                                 });
-                                return plugin;
                             }
                         }
                         catch (MissingMethodException)
@@ -175,10 +190,12 @@ namespace IntegrationPlatform.Worker.Plugins
                         }
                     }
                 }
-
-                // Plugin bulunamadıysa context'i temizle
-                context.Dispose();
-                return null;
+                if (!loadedPlugins.Any())
+                {
+                    // Hiç plugin yüklenemediyse context'i temizle
+                    context.Dispose();
+                }
+                return loadedPlugins;
             }
             catch (Exception ex)
             {
@@ -187,7 +204,34 @@ namespace IntegrationPlatform.Worker.Plugins
                 throw;
             }
         }
+        private IPlugin CreatePluginInstance(Type pluginType)
+        {
+            // Parametresiz constructor dene
+            var constructor = pluginType.GetConstructor(Type.EmptyTypes);
+            if (constructor != null)
+            {
+                return Activator.CreateInstance(pluginType, true) as IPlugin;
+            }
 
+            // ILogger<T> constructor'ı dene
+            var loggerConstructor = pluginType.GetConstructors()
+                .FirstOrDefault(c =>
+                    c.GetParameters().Length == 1 &&
+                    c.GetParameters()[0].ParameterType.IsGenericType &&
+                    c.GetParameters()[0].ParameterType.GetGenericTypeDefinition() == typeof(ILogger<>));
+
+            if (loggerConstructor != null)
+            {
+                var loggerType = typeof(ILogger<>).MakeGenericType(pluginType);
+                var logger = _logger != null ?
+                    Activator.CreateInstance(loggerType, _logger) :
+                    null;
+
+                return Activator.CreateInstance(pluginType, logger) as IPlugin;
+            }
+
+            return null;
+        }
         public async Task<IEnumerable<ISourcePlugin>> GetSourcePluginsAsync()
         {
             return _plugins.Values

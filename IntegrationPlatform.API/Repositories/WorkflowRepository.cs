@@ -112,6 +112,8 @@ namespace IntegrationPlatform.API.Repositories
 
                 execution.TotalRecordsProcessed = execution.StepExecutions?.Sum(s => s.ProcessedRecords) ?? 0;
                 execution.ErrorMessage = "";
+                execution.StepExecutions = execution.StepExecutions ?? new List<StepExecution>();
+
                 _context.WorkflowExecutions.Add(execution);
                 await _context.SaveChangesAsync();
 

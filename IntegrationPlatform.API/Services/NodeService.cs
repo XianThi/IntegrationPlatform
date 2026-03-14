@@ -119,9 +119,13 @@ namespace IntegrationPlatform.API.Services
             var compatibleNodes = availableNodes
                 .Where(n => n.SupportedAdapters != null)
                 .Where(n => !requiredAdapters.Any() || requiredAdapters.All(ra =>
-                    n.SupportedAdapters.Contains(ra.ToString())))
-                .ToList();
-
+                    n.SupportedAdapters.Any(sa =>
+                    sa.Split(':')[0].Trim() == ra.ToString()  // ":" dan önceki kısmı al
+                )))
+            .ToList();
+            var a = requiredAdapters.FirstOrDefault().ToString();
+            var b = availableNodes.Where(n => n.SupportedAdapters != null);
+            var c = b.Any(d => d.SupportedAdapters.Contains(a));
             if (!compatibleNodes.Any())
             {
                 return null;
@@ -129,9 +133,9 @@ namespace IntegrationPlatform.API.Services
 
             // En az yüklü node'u seç (basit load balancing)
             var selectedNode = compatibleNodes
-                .OrderBy(n => n.Metrics != null && n.Metrics.ContainsKey("workload")
-                    ? Convert.ToInt32(n.Metrics["workload"])
-                    : 0)
+                //.OrderBy(n => n.Metrics != null && n.Metrics.ContainsKey("workload")
+                //    ? Convert.ToInt32(n.Metrics["workload"])
+                //    : 0)
                 .First();
 
             return _mapper.Map<NodeDto>(selectedNode);

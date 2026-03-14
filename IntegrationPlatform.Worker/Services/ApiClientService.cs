@@ -186,7 +186,6 @@ namespace IntegrationPlatform.Worker.Services
             {
                 _logger.LogInformation("Workflow execution raporlanıyor: {WorkflowId}, Status: {Status}",
                     execution.WorkflowId, execution.Status);
-
                 var response = await _httpClient.PostAsJsonAsync("api/workflows/executions", execution, _jsonOptions, cancellationToken);
 
                 if (response.IsSuccessStatusCode)

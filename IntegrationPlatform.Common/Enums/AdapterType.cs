@@ -17,30 +17,24 @@
         // Source Adapter'lar (Veri Kaynakları)
         Rest = 1,
         Soap = 2,
-        Database = 3,
-        Ftp = 4,
-
-        // File Source'lar
-        JsonFile = 5,
+        JsonFile = 3,
+        Database = 4,
+        Ftp = 5,
         CsvFile = 6,
-        XmlFile = 7,
-        ExcelFile = 8,
-
-        // Transform Adapter'lar
-        DataMapper = 9,
-        ScriptEngine = 10,
-        Aggregator = 11,
-        Filter = 12,
+        ExcelFile = 7,
 
         // Destination Adapter'lar (Veri Hedefleri)
-        DatabaseWriter = 13,
-        FtpWriter = 14,
+        JsonWriter = 8,
+        DatabaseWriter = 9,
+        FtpWriter = 10,
+        CsvWriter = 11,
+        ExcelWriter = 12,
 
-        // File Destination'lar
-        JsonWriter = 15,
-        CsvWriter = 16,
-        XmlWriter = 17,
-        ExcelWriter = 18
+        // Transform Adapter'lar
+        DataMapper = 13,
+        ScriptEngine = 14,
+        Aggregator = 15,
+        Filter = 16,
     }
 
     public enum WorkflowStatus

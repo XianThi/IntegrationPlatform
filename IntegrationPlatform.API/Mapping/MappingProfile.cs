@@ -31,7 +31,12 @@ namespace IntegrationPlatform.API.Mapping
                 .ForMember(dest => dest.GlobalVariables, opt => opt.MapFrom(src => src.GlobalVariables))
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
                 .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => src.UpdatedAt));
-
+            CreateMap<CreateWorkflowDto, WorkflowDefinition>()
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
+                .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.IsActive))
+                .ForMember(dest => dest.Steps, opt => opt.MapFrom(src => src.Steps))
+                .ForMember(dest => dest.GlobalVariables, opt => opt.MapFrom(src => src.GlobalVariables));
             CreateMap<WorkflowDefinitionDto, WorkflowDefinition>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
