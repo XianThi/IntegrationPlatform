@@ -3,7 +3,6 @@ using IntegrationPlatform.API.Models;
 using IntegrationPlatform.API.Repositories;
 using IntegrationPlatform.Common.DTOs;
 using IntegrationPlatform.Common.Enums;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace IntegrationPlatform.API.Services
 {

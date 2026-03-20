@@ -16,6 +16,7 @@ namespace IntegrationPlatform.API.Data
         public DbSet<WorkflowExecution> WorkflowExecutions { get; set; }
         public DbSet<StepExecution> StepExecutions { get; set; }
         public DbSet<SystemLog> SystemLogs { get; set; }
+        public DbSet<Test> Tests { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

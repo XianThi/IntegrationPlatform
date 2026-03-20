@@ -69,6 +69,7 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 // Repositories
 builder.Services.AddScoped<INodeRepository, NodeRepository>();
 builder.Services.AddScoped<IWorkflowRepository, WorkflowRepository>();
+builder.Services.AddScoped<ITestRepository, TestRepository>();
 
 // Services
 builder.Services.AddScoped<INodeService, NodeService>();

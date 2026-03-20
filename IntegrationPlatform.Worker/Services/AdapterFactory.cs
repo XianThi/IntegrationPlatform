@@ -3,11 +3,6 @@ using IntegrationPlatform.Common.Interfaces;
 using IntegrationPlatform.Common.Interfaces.Plugins;
 using IntegrationPlatform.Common.Models;
 using IntegrationPlatform.Worker.Interfaces.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace IntegrationPlatform.Worker.Services
 {

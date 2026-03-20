@@ -58,7 +58,7 @@ namespace IntegrationPlatform.Common.DTOs
         public string OutputPreview { get; set; } = string.Empty;
     }
 
-    public class  UpdateWorkflowDto
+    public class UpdateWorkflowDto
     {
         public string Name { get; set; }
         public string Description { get; set; }

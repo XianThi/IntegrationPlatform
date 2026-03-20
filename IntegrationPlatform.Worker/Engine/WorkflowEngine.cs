@@ -158,6 +158,7 @@ namespace IntegrationPlatform.Worker.Engine
             }
 
             stepExecution.CompletedAt = DateTime.UtcNow;
+            
             return stepExecution;
         }
         private AdapterDirection GetDirectionFromAdapterType(AdapterType adapterType, Dictionary<string, object> configuration)
@@ -171,9 +172,8 @@ namespace IntegrationPlatform.Worker.Engine
                 AdapterType.JsonFile => DetermineJsonDirection(configuration),
                 AdapterType.JsonWriter => AdapterDirection.Destination,
                 // Database source veya destination olabilir
-                AdapterType.Database => configuration.ContainsKey("ConnectionString") && configuration.ContainsKey("Query")
-                    ? AdapterDirection.Source
-                    : AdapterDirection.Destination,
+                AdapterType.Database => AdapterDirection.Source,
+                AdapterType.DatabaseWriter => AdapterDirection.Destination,
 
                 _ => AdapterDirection.Transform
             };
@@ -208,7 +208,7 @@ namespace IntegrationPlatform.Worker.Engine
         //}
         private async Task<IPlugin> GetPluginForStepAsync(AdapterType adapterType, AdapterDirection direction)
         {
-            _logger.LogDebug("Plugin aranıyor: AdapterType={AdapterType}, Direction={Direction}",adapterType, direction);
+            _logger.LogDebug("Plugin aranıyor: AdapterType={AdapterType}, Direction={Direction}", adapterType, direction);
             var pluginId = GetPluginId(adapterType);
             return direction switch
             {
@@ -226,6 +226,7 @@ namespace IntegrationPlatform.Worker.Engine
                 AdapterType.JsonFile => "IntegrationPlatform.Adapters.Json",
                 AdapterType.JsonWriter => "IntegrationPlatform.Adapters.Json.Writer",
                 AdapterType.Database => "IntegrationPlatform.Adapters.Database",
+                AdapterType.DatabaseWriter => "IntegrationPlatform.Adapters.Database.Writer",
                 _ => throw new NotSupportedException($"Adapter tipi desteklenmiyor: {adapterType}")
             };
         }

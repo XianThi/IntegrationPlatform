@@ -119,6 +119,8 @@ public class WorkerService : BackgroundService
         };
 
         _currentNode = await _apiClient.RegisterNodeAsync(registration);
+        _settings.NodeId = _currentNode.Id.ToString();
+        WriteNodeIdToFile(_currentNode.Id);
         _logger.LogInformation("Node baþarýyla register oldu. Node ID: {NodeId}", _currentNode.Id);
     }
 
@@ -284,7 +286,8 @@ public class WorkerService : BackgroundService
         {
             // Node'u offline olarak iþaretle
             await UpdateNodeStatusAsync(NodeStatus.Offline);
-        }catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             _logger.LogError(ex, "Node durdurulurken hata oluþtu");
         }
@@ -295,7 +298,7 @@ public class WorkerService : BackgroundService
     {
         try
         {
-            if(_currentNode == null)
+            if (_currentNode == null)
             {
                 _logger.LogWarning("Node bilgisi mevcut deðil, status güncellenemiyor");
                 return;
@@ -326,5 +329,19 @@ public class WorkerService : BackgroundService
     {
         var process = System.Diagnostics.Process.GetCurrentProcess();
         return (float)(process.WorkingSet64 / (double)GetTotalMemory() * 100);
+    }
+
+    private void WriteNodeIdToFile(Guid nodeId)
+    {
+        try
+        {
+            var filePath = Path.Combine(AppContext.BaseDirectory, "node_id.txt");
+            File.WriteAllText(filePath, nodeId.ToString());
+            _logger.LogInformation("Node ID dosyaya yazýldý: {FilePath}", filePath);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Node ID dosyaya yazýlýrken hata oluþtu");
+        }
     }
 }

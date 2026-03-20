@@ -207,6 +207,52 @@ namespace IntegrationPlatform.Worker.Services
             }
         }
 
+        public async Task<List<TestRequestDto>> GetPendingTestRequestsAsync(Guid nodeId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"api/test/pending?nodeId={nodeId}", cancellationToken);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var requests = await response.Content.ReadFromJsonAsync<List<TestRequestDto>>(_jsonOptions, cancellationToken);
+                    return requests ?? new List<TestRequestDto>();
+                }
+
+                return new List<TestRequestDto>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Pending test requests alınamadı");
+                return new List<TestRequestDto>();
+            }
+        }
+
+        public async Task UpdateTestRequestStatusAsync(Guid requestId, string status)
+        {
+            try
+            {
+                var update = new { Status = status, ProcessedAt = DateTime.UtcNow };
+                await _httpClient.PutAsJsonAsync($"api/test/{requestId}/status", update, _jsonOptions);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Test request status güncellenemedi: {RequestId}", requestId);
+            }
+        }
+
+        public async Task SubmitTestResultAsync(TestResultDto result, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _httpClient.PostAsJsonAsync("api/test/results", result, _jsonOptions, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Test result gönderilemedi: {RequestId}", result.RequestId);
+            }
+        }
+
         #endregion
 
         #region Adapter Operations

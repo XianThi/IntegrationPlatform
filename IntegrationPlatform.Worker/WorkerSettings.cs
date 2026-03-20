@@ -4,6 +4,7 @@
     {
         public string ApiBaseUrl { get; set; } = "http://localhost:5000";
         public string NodeName { get; set; }
+        public string? NodeId { get; set; }
         public int HeartbeatIntervalSeconds { get; set; } = 30;
         public int WorkflowPollingIntervalSeconds { get; set; } = 60;
         public string AdaptersPath { get; set; } = "Adapters";

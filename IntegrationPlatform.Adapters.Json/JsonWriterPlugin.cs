@@ -2,14 +2,9 @@
 using IntegrationPlatform.Common.Interfaces;
 using IntegrationPlatform.Common.Interfaces.Plugins;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Threading.Tasks;
 
 namespace IntegrationPlatform.Adapters.Json
 {

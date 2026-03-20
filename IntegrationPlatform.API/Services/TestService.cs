@@ -1,5 +1,11 @@
-﻿using IntegrationPlatform.Common.Enums;
+﻿using IntegrationPlatform.API.Controllers;
+using IntegrationPlatform.API.Repositories;
+using IntegrationPlatform.Common.DTOs;
+using IntegrationPlatform.Common.Enums;
+using IntegrationPlatform.Common.Interfaces;
 using IntegrationPlatform.Common.Interfaces.Plugins;
+using IntegrationPlatform.Common.Models;
+using System.Collections.Concurrent;
 using System.Text.Json;
 
 namespace IntegrationPlatform.API.Services
@@ -8,8 +14,9 @@ namespace IntegrationPlatform.API.Services
     {
         private readonly ILogger<TestService> _logger;
         private readonly JsonSerializerOptions _jsonOptions;
+        private readonly ITestRepository _testRepository;
 
-        public TestService(ILogger<TestService> logger)
+        public TestService(ILogger<TestService> logger, ITestRepository testRepository)
         {
             _logger = logger;
             _jsonOptions = new JsonSerializerOptions
@@ -17,94 +24,88 @@ namespace IntegrationPlatform.API.Services
                 PropertyNameCaseInsensitive = true,
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             };
+            _testRepository = testRepository;
         }
 
-        public async Task<SourceTestResult> TestSourceAsync(AdapterType adapterType, Dictionary<string, object> configuration)
+        public async Task CreateTestRequestAsync(TestRequestDto request)
         {
-            try
+            if (request.Id == null || request.Id == Guid.Empty)
             {
-                // Worker'lardan birine test isteği gönder
-                // veya direkt plugin çağrısı yap - şimdilik mock data dön
-
-                _logger.LogInformation("Test isteği alındı: {AdapterType}", adapterType);
-
-                // Mock test sonucu
-                return adapterType switch
-                {
-                    AdapterType.Rest => new SourceTestResult
-                    {
-                        IsSuccess = true,
-                        Message = "REST API test başarılı",
-                        SampleData = new[] { new { id = 1, name = "Test" } },
-                        ResponseTime = TimeSpan.FromMilliseconds(123),
-                        StatusCode = 200
-                    },
-
-                    AdapterType.JsonFile => new SourceTestResult
-                    {
-                        IsSuccess = true,
-                        Message = "JSON test başarılı",
-                        SampleData = new[] { new { id = 1, value = "test" } },
-                        ResponseTime = TimeSpan.FromMilliseconds(45),
-                        StatusCode = 200
-                    },
-
-                    AdapterType.Database => new SourceTestResult
-                    {
-                        IsSuccess = true,
-                        Message = "Database test başarılı",
-                        SampleData = new[] { new { id = 1, name = "Test" } },
-                        ResponseTime = TimeSpan.FromMilliseconds(67),
-                        StatusCode = 200
-                    },
-
-                    _ => new SourceTestResult
-                    {
-                        IsSuccess = false,
-                        Message = "Desteklenmeyen adapter tipi",
-                        StatusCode = 400
-                    }
-                };
+                request.Id = Guid.NewGuid();
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Test hatası");
-                return new SourceTestResult
-                {
-                    IsSuccess = false,
-                    Message = ex.Message,
-                    StatusCode = 500
-                };
-            }
+            await _testRepository.AddTestRequest(request.Id.ToString(), request);
+            _logger.LogInformation("Test request oluşturuldu: {RequestId}", request.Id);
+            await Task.CompletedTask;
         }
 
-        public async Task<DestinationTestResult> TestDestinationAsync(AdapterType adapterType, Dictionary<string, object> configuration)
+        public async Task<TestResultDto> WaitForResultAsync(Guid requestId, TimeSpan timeout)
         {
-            try
-            {
-                _logger.LogInformation("Destination test isteği: {AdapterType}", adapterType);
+            var startTime = DateTime.UtcNow;
 
-                return new DestinationTestResult
-                {
-                    IsSuccess = true,
-                    Message = "Destination test başarılı",
-                    CanWrite = true,
-                    Details = new Dictionary<string, object>
-                    {
-                        ["provider"] = "mock",
-                        ["test_time"] = DateTime.UtcNow
-                    }
-                };
-            }
-            catch (Exception ex)
+            while (DateTime.UtcNow - startTime < timeout)
             {
-                return new DestinationTestResult
+                if (await _testRepository.IsTestingFinish(requestId.ToString()))
                 {
-                    IsSuccess = false,
-                    Message = ex.Message,
-                    Errors = new List<string> { ex.Message }
-                };
+                    var result = await _testRepository.GetTestResponse(requestId.ToString());
+                    if (result != null)
+                    {
+                        _logger.LogInformation("Test sonucu bulundu: {RequestId}, Success: {IsSuccess}",
+                            requestId, true);
+                        return new TestResultDto
+                        {
+                            RequestId = requestId,
+                            IsSuccess = true,
+                            Message = "Test completed successfully",
+                            Result = result,
+                            CompletedAt = DateTime.UtcNow
+                        };
+                    }
+                }
+
+                await Task.Delay(100);
             }
+
+            return null;
+        }
+
+        public async Task<List<TestRequestDto>> GetPendingRequestsAsync(Guid nodeId)
+        {
+            // Sadece bu node'a atanmış veya atanmamış request'leri getir
+            var requests = await _testRepository.GetPendingRequests();
+
+            // İlk bulunan request'i bu node'a ata
+            if (requests.Any())
+            {
+                var chosenRequest = requests.FirstOrDefault();
+                if (chosenRequest != null)
+                {
+                    chosenRequest.AssignedNodeId = nodeId;
+                    chosenRequest.Status = "Processing";
+                    await _testRepository.UpdateRequest(chosenRequest.Id.ToString(), chosenRequest);
+                }
+                else
+                {
+                    _logger.LogInformation("Bu node için atanacak bekleyen test isteği bulunamadı: {NodeId}", nodeId);
+                    return null;
+                }
+            }
+
+            return requests;
+        }
+
+        public async Task UpdateRequestStatusAsync(Guid requestId, string status)
+        {
+            await _testRepository.UpdateRequestStatus(requestId.ToString(), status);
+            await Task.CompletedTask;
+        }
+
+        public async Task SubmitResultAsync(TestResultDto result)
+        {
+            _logger.LogInformation("Test result alındı: {RequestId}, Success: {IsSuccess}",
+                result.RequestId, result.IsSuccess);
+
+            await _testRepository.AddTestResponse(result.RequestId.ToString(), result);
+            await Task.CompletedTask;
         }
     }
 }

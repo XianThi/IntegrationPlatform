@@ -4,8 +4,6 @@ using IntegrationPlatform.Common.Interfaces;
 using IntegrationPlatform.Common.Interfaces.Plugins;
 using IntegrationPlatform.Common.Models;
 using Microsoft.Extensions.Logging;
-using System.Diagnostics;
-using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -26,7 +24,8 @@ namespace IntegrationPlatform.Adapters.Json
         public override AdapterType Type => AdapterType.JsonFile;
 
 
-        public JsonReaderPlugin() {
+        public JsonReaderPlugin()
+        {
             _jsonOptions = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
@@ -55,7 +54,7 @@ namespace IntegrationPlatform.Adapters.Json
 
         #region ISourcePlugin - Json Dosyası Okuma
 
-        
+
         public async Task<SourceTestResult> TestConnectionAsync(Dictionary<string, object> configuration)
         {
             try
@@ -194,7 +193,7 @@ namespace IntegrationPlatform.Adapters.Json
 
         #endregion
 
-       
+
         public async Task<AdapterMetadata> GetMetadataAsync()
         {
             return new AdapterMetadata

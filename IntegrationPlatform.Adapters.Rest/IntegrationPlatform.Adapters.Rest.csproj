@@ -13,5 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\IntegrationPlatform.Common\IntegrationPlatform.Common.csproj" />
   </ItemGroup>
-
+	<PropertyGroup>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	</PropertyGroup>
 </Project>

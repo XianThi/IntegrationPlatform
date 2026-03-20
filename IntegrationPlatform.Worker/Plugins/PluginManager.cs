@@ -100,11 +100,10 @@ namespace IntegrationPlatform.Worker.Plugins
             _logger.LogDebug("Plugin yükleniyor: {AssemblyPath}", assemblyPath);
 
             // İzole edilmiş context oluştur
-            var context = new PluginIsolationContext
-            {
-                PluginId = Guid.NewGuid().ToString(),
-                LoadContext = new AssemblyLoadContext(Path.GetFileName(assemblyPath), true)
-            };
+            var context = new PluginIsolationContext(
+                    Guid.NewGuid().ToString(),
+                    assemblyPath
+            );
             var loadedPlugins = new List<IPlugin>();
             try
             {
@@ -123,7 +122,7 @@ namespace IntegrationPlatform.Worker.Plugins
                         try
                         {
                             // Parametresiz constructor var
-                            if (Activator.CreateInstance(pluginType,true) is IPlugin plugin)
+                            if (Activator.CreateInstance(pluginType, true) is IPlugin plugin)
                             {
                                 var initContext = new PluginContext
                                 {

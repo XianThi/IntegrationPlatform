@@ -37,7 +37,7 @@ builder.Services.AddHttpClient("apiClient", client =>
         (message, cert, chain, errors) => true  // HER ÞEYE GÜVEN
 });
 
-
+builder.Services.AddSingleton<WorkerSettings>();
 // Plugin Manager ve Workflow Engine (Geçici implementasyon)
 builder.Services.AddSingleton<IPluginManager, PluginManager>();
 builder.Services.AddSingleton<IAdapterFactory, AdapterFactory>();
@@ -54,6 +54,7 @@ builder.Services.AddSingleton<IApiClientService>(sp =>
 
 // Worker Service
 builder.Services.AddHostedService<WorkerService>();
+builder.Services.AddHostedService<TestPollingService>();
 
 // Health Checks
 builder.Services.AddHealthChecks()

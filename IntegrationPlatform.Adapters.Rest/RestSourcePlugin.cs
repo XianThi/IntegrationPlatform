@@ -25,7 +25,7 @@ namespace IntegrationPlatform.Adapters.Rest
         public AdapterDirection Direction => AdapterDirection.Source;
         public AdapterType Type => AdapterType.Rest;
 
-        
+
         // 1️⃣ PARAMETRESİZ CONSTRUCTOR (ZORUNLU!)
         public RestSourcePlugin()
         {
@@ -37,7 +37,7 @@ namespace IntegrationPlatform.Adapters.Rest
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             };
         }
-        public RestSourcePlugin(ILogger<RestSourcePlugin> logger):this()
+        public RestSourcePlugin(ILogger<RestSourcePlugin> logger) : this()
         {
             _logger = logger;
             _jsonOptions = new JsonSerializerOptions
